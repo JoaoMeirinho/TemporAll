@@ -1,0 +1,49 @@
+# Ambiente virtual
+venv/
+env/
+ENV/
+
+# Arquivos de cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Arquivos de distribuição / empacotamento
+dist/
+build/
+*.egg-info/
+
+# Arquivos de log
+*.log
+logs/
+
+# Arquivos de ambiente local
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Arquivos de configuração IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de imagem gerados pelo projeto
+MODIS_Terra_CorrectedReflectance_TrueColor.png
+IMERG_Precipitation_Rate_Ian.gif
+
+# Arquivos de banco de dados
+*.sqlite3
+*.db
+
+# Arquivos temporários
+*.tmp
+*.bak
