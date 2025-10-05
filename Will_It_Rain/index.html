@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="acessarServidor()">acessar servidor</button>
+
+    <script>
+        function acessarServidor() {
+            fetch("http://localhost:8080")
+                .then(response => response.text())
+                .then(data => {
+                    const txt = document.createElement("p");
+                    txt.textContent = data;
+                    document.body.appendChild(txt);
+                })
+                .catch(error => {
+                    console.error("Erro ao acessar o servidor:", error);
+                });
+        }
+    </script>
+</body>
+</html>
