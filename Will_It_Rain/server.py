@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import json
 
+from gemini import get_explicacao
 import imagem
 from modelo_preditivo import prever
 
@@ -31,8 +32,10 @@ async def get_data(longitude: str = "-47.45", latitude: str = "-23.51", data: st
     #     "precipitacao": "0 mm"
     # }
     dados = prever(data, float(latitude), float(longitude))
+    explicacao = await get_explicacao(dados)
     
-    resposta = {"dados": dados}
+    resposta = {"dados": dados,
+                "explicacao": explicacao}
     return resposta
 
 @app.get("/image")
