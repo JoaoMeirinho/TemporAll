@@ -6,6 +6,7 @@ import os
 import requests
 import pandas as pd
 import numpy as np
+import glob
 from sklearn.ensemble import RandomForestRegressor
 from joblib import dump, load
 
@@ -15,7 +16,7 @@ from joblib import dump, load
 def coletar_dados(latitude, longitude, start=20100101, end=20241231):
     url = (
         "https://power.larc.nasa.gov/api/temporal/daily/point?"
-        f"parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR,RH2M,ALLSKY_SFC_UV_INDEX"
+        f"parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR,RH2M,ALLSKY_SFC_UV_INDEX,WS50M,PRECSNOLAND"
         f"&community=RE&longitude={longitude}"
         f"&latitude={latitude}&start={start}&end={end}&format=JSON"
     )
@@ -28,8 +29,10 @@ def coletar_dados(latitude, longitude, start=20100101, end=20241231):
     temperatura_max = data.get("T2M_MAX", {})
     temperatura_min = data.get("T2M_MIN", {})
     precipitacao = data.get("PRECTOTCORR", data.get("PRECTOT", {}))
+    precipitacao_neve = data.get("PRECSNOLAND", {})
     umidade = data.get("RH2M", {})
     uv = data.get("ALLSKY_SFC_UV_INDEX", {})
+    vento = data.get("WS50M", {})
 
     # Monta DataFrame
     datas = list(temperatura.keys())
@@ -39,8 +42,10 @@ def coletar_dados(latitude, longitude, start=20100101, end=20241231):
         "temperatura_max": [temperatura_max.get(d, None) for d in datas],
         "temperatura_min": [temperatura_min.get(d, None) for d in datas],
         "precipitacao": [precipitacao.get(d, None) for d in datas],
+        "precipitacao_neve": [precipitacao_neve.get(d, None) for d in datas],
         "umidade": [umidade.get(d, None) for d in datas],
-        "uv": [uv.get(d, None) for d in datas]
+        "uv": [uv.get(d, None) for d in datas],
+        "vento": [vento.get(d, None) for d in datas]
     })
 
     print(f"✅ Dados coletados para ({latitude}, {longitude}) — {len(df)} registros encontrados.")
@@ -66,8 +71,10 @@ def treinar_modelos(df):
         "temp_max": ("temperatura_max", os.path.join(modelo_dir, "modelo_temp_max.joblib")),
         "temp_min": ("temperatura_min", os.path.join(modelo_dir, "modelo_temp_min.joblib")),
         "prec": ("precipitacao", os.path.join(modelo_dir, "modelo_prec.joblib")),
+        "prec_neve": ("precipitacao_neve", os.path.join(modelo_dir, "modelo_prec_neve.joblib")),
         "umi": ("umidade", os.path.join(modelo_dir, "modelo_umi.joblib")),
         "uv": ("uv", os.path.join(modelo_dir, "modelo_uv.joblib")),
+        "vento": ("vento", os.path.join(modelo_dir, "modelo_vento.joblib")),
     }
 
     for nome, (coluna, caminho) in modelos.items():
@@ -81,7 +88,25 @@ def treinar_modelos(df):
 
 
 # ======================================
-# 3️⃣ FUNÇÃO DE PREVISÃO
+# 3️⃣ FUNÇÃO PARA LIMPAR MODELOS
+# ======================================
+def limpar_modelos():
+    """Remove todos os arquivos de modelo da pasta 'modelos'."""
+    modelo_dir = os.path.join(os.path.dirname(__file__), "modelos")
+    if os.path.exists(modelo_dir):
+        arquivos_modelo = glob.glob(os.path.join(modelo_dir, "*.joblib"))
+        for arquivo in arquivos_modelo:
+            try:
+                os.remove(arquivo)
+                print(f"✅ Modelo removido: {os.path.basename(arquivo)}")
+            except Exception as e:
+                print(f"⚠️ Erro ao remover modelo {os.path.basename(arquivo)}: {e}")
+        print("🧹 Limpeza de modelos concluída!")
+    else:
+        print("⚠️ Pasta de modelos não encontrada.")
+
+# ======================================
+# 4️⃣ FUNÇÃO DE PREVISÃO
 # ======================================
 def prever(data, latitude, longitude):
     treinar_modelos(coletar_dados(latitude, longitude))
@@ -93,8 +118,10 @@ def prever(data, latitude, longitude):
         "temperatura_max_prevista": load(os.path.join(modelo_dir, "modelo_temp_max.joblib")),
         "temperatura_min_prevista": load(os.path.join(modelo_dir, "modelo_temp_min.joblib")),
         "precipitacao_prevista": load(os.path.join(modelo_dir, "modelo_prec.joblib")),
+        "precipitacao_neve_prevista": load(os.path.join(modelo_dir, "modelo_prec_neve.joblib")),
         "umidade_prevista": load(os.path.join(modelo_dir, "modelo_umi.joblib")),
         "indice_uv_previsto": load(os.path.join(modelo_dir, "modelo_uv.joblib")),
+        "vento_previsto": load(os.path.join(modelo_dir, "modelo_vento.joblib")),
     }
 
     data = pd.to_datetime(data)
@@ -112,6 +139,9 @@ def prever(data, latitude, longitude):
         "longitude": longitude,
         **resultados
     }
+    
+    # Limpa os modelos após obter os resultados
+    limpar_modelos()
 
     return previsao
 
@@ -137,9 +167,9 @@ if __name__ == "__main__":
             treinar_modelos(df)
             break
         except ValueError:
-            print("\n⚠️ Erro: Por favor, digite números válidos para latitude e longitude.")
+            print("\n Erro: Por favor, digite números válidos para latitude e longitude.")
         except Exception as e:
-            print(f"\n⚠️ Erro ao coletar dados: {e}")
+            print(f"\n Erro ao coletar dados: {e}")
             print("Tente novamente.")
 
     print("\n💬 Sistema de previsão iniciado!")
