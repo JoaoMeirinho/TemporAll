@@ -2,6 +2,7 @@
 venv/
 env/
 ENV/
+modelos/
 
 # Arquivos de cache do Python
 __pycache__/

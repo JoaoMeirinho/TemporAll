@@ -5,6 +5,7 @@ import uvicorn
 import json
 
 import imagem
+from modelo_preditivo import prever
 
 app = FastAPI()
 
@@ -18,30 +19,36 @@ app.add_middleware(
 )
 
 @app.get("/get")
-async def get_data(longitude: str = "Desconhecido", latitude: str = "Desconhecido", data: str = "Desconhecido"):
+async def get_data(longitude: str = "-47.45", latitude: str = "-23.51", data: str = "2025-10-01"):
     # Mantendo o mesmo formato de resposta do servidor original
-    dados = {
-        "sensação térmica": "30°C",
-        "umidade do ar": "80%",
-        "velocidade do vento": "15 km/h",
-        "condição": "Ensolarado",
-        "temperatura": "28°C",
-        "condicao_detalhada": "Céu limpo",
-        "precipitacao": "0 mm"
-    }
+    # dados = {
+    #     "sensação térmica": "30°C",
+    #     "umidade do ar": "80%",
+    #     "velocidade do vento": "15 km/h",
+    #     "condição": "Ensolarado",
+    #     "temperatura": "28°C",
+    #     "condicao_detalhada": "Céu limpo",
+    #     "precipitacao": "0 mm"
+    # }
+    dados = prever(data, float(latitude), float(longitude))
     
     resposta = {"dados": dados}
     return resposta
 
 @app.get("/image")
-async def get_image(longitude: str = "Desconhecido", latitude: str = "Desconhecido"):
+async def get_image(longitude: str = "-47.45", latitude: str = "-23.51", layer: str = "umidade_relativa", data: str = None, delta: float = 0.5):
     # Convertendo para float conforme o código original
     try:
         lat_float = float(latitude)
         lon_float = float(longitude)
-        data = datetime.now().strftime("%Y-%m-%d")
-        imagem.getImage(lat_float, lon_float, delta=1.0, date=data)
-        return {"status": "success", "message": "Imagem gerada com sucesso"}
+        
+        # Se a data não for fornecida, usar a data atual
+        if data is None or data == "Desconhecido":
+            data = datetime.now().strftime("%Y-%m-%d")
+            
+        # Usar a função getImage com o parâmetro de camada e zoom aumentado
+        imagem.getImage(lat_float, lon_float, layer_type=layer, delta=delta, date=data)
+        return {"status": "success", "message": f"Imagem gerada com sucesso usando camada: {layer}, zoom: {delta}"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
