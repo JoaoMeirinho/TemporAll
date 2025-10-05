@@ -116,51 +116,51 @@ def prever(data, latitude, longitude):
     return previsao
 
 
-# ======================================
-# 4️⃣ EXECUÇÃO GERAL
-# ======================================
-if __name__ == "__main__":
-    print("🌍 Bem-vindo ao sistema de previsão climática!")
-    print("Primeiro, preciso saber para qual localização você quer treinar o modelo.\n")
+# # ======================================
+# # 4️⃣ EXECUÇÃO GERAL
+# # ======================================
+# if __name__ == "__main__":
+#     print("🌍 Bem-vindo ao sistema de previsão climática!")
+#     print("Primeiro, preciso saber para qual localização você quer treinar o modelo.\n")
     
-    # Coleta inicial de latitude e longitude
-    while True:
-        try:
-            lat_str = input("Digite a latitude (ex: -23.51): ").strip()
-            lon_str = input("Digite a longitude (ex: -47.45): ").strip()
+#     # Coleta inicial de latitude e longitude
+#     while True:
+#         try:
+#             lat_str = input("Digite a latitude (ex: -23.51): ").strip()
+#             lon_str = input("Digite a longitude (ex: -47.45): ").strip()
             
-            latitude = float(lat_str)
-            longitude = float(lon_str)
+#             latitude = float(lat_str)
+#             longitude = float(lon_str)
             
-            print(f"\n🌍 Coletando dados para ({latitude}, {longitude})...")
-            df = coletar_dados(latitude, longitude)
-            treinar_modelos(df)
-            break
-        except ValueError:
-            print("\n⚠️ Erro: Por favor, digite números válidos para latitude e longitude.")
-        except Exception as e:
-            print(f"\n⚠️ Erro ao coletar dados: {e}")
-            print("Tente novamente.")
+#             print(f"\n🌍 Coletando dados para ({latitude}, {longitude})...")
+#             df = coletar_dados(latitude, longitude)
+#             treinar_modelos(df)
+#             break
+#         except ValueError:
+#             print("\n⚠️ Erro: Por favor, digite números válidos para latitude e longitude.")
+#         except Exception as e:
+#             print(f"\n⚠️ Erro ao coletar dados: {e}")
+#             print("Tente novamente.")
 
-    print("\n💬 Sistema de previsão iniciado!")
-    print(f"📍 Localização definida: ({latitude}, {longitude})")
-    print("Digite uma data (YYYY-MM-DD) para ver a previsão, ou 'sair' para encerrar.\n")
+#     print("\n💬 Sistema de previsão iniciado!")
+#     print(f"📍 Localização definida: ({latitude}, {longitude})")
+#     print("Digite uma data (YYYY-MM-DD) para ver a previsão, ou 'sair' para encerrar.\n")
 
-    while True:
-        entrada = input("→ ")
-        if entrada.lower() in ["sair", "exit"]:
-            print("👋 Encerrando o sistema de previsões...")
-            break
+#     while True:
+#         entrada = input("→ ")
+#         if entrada.lower() in ["sair", "exit"]:
+#             print("👋 Encerrando o sistema de previsões...")
+#             break
 
-        try:
-            data = entrada.strip()
-            previsao = prever(data, latitude, longitude)
-            print("\n=== 🌦️ Previsão Climática ===")
-            for k, v in previsao.items():
-                print(f"{k.replace('_', ' ').capitalize()}: {v}")
-            print("=============================\n")
+#         try:
+#             data = entrada.strip()
+#             previsao = prever(data, latitude, longitude)
+#             print("\n=== 🌦️ Previsão Climática ===")
+#             for k, v in previsao.items():
+#                 print(f"{k.replace('_', ' ').capitalize()}: {v}")
+#             print("=============================\n")
 
-        except Exception as e:
-            print("⚠️ Erro na entrada. Use o formato: YYYY-MM-DD")
-            print("Exemplo: 2024-12-31")
-            print("Detalhes:", e)
+#         except Exception as e:
+#             print("⚠️ Erro na entrada. Use o formato: YYYY-MM-DD")
+#             print("Exemplo: 2024-12-31")
+#             print("Detalhes:", e)
